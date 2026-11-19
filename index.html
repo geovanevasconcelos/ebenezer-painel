@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="color-scheme" content="light dark">
+<title>Ebenézer · Painel de crescimento</title>
+<style>
+:root{--azul:#2563EB;--amarelo:#F5C542;--fundo:#F4F6FB;--card:#fff;--texto:#0F172A;--suave:#64748B;--borda:#E2E8F0;--trilho:#EEF2F7}
+@media(prefers-color-scheme:dark){:root{--fundo:#0A1020;--card:#111A2E;--texto:#E6EDF8;--suave:#93A3BB;--borda:#24324F;--trilho:#1D2944}}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--fundo);color:var(--texto);font-family:Nunito,'Segoe UI',system-ui,-apple-system,sans-serif}
+button,input{font:inherit}
+.entrada{min-height:100%;display:grid;place-items:center;padding:24px;background:linear-gradient(135deg,#1E3A8A,#2563EB 60%,#3B82F6)}
+.caixa{background:var(--card);border-radius:20px;padding:28px;width:min(380px,100%);box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.caixa h1{margin:10px 0 4px;font-size:22px}.caixa p{margin:0 0 18px;color:var(--suave);font-size:14px}
+.caixa input[type=password]{width:100%;padding:12px 14px;border:1.5px solid var(--borda);border-radius:12px;background:var(--fundo);color:var(--texto);font-size:16px}
+.caixa input[type=password]:focus{outline:2px solid var(--azul);border-color:transparent}
+.lembrar{display:flex;gap:8px;align-items:center;margin:12px 0 16px;font-size:14px;color:var(--suave)}
+.primario{width:100%;padding:12px;border:0;border-radius:12px;background:var(--azul);color:#fff;font-weight:800;cursor:pointer}
+.primario:disabled{opacity:.6;cursor:wait}
+.erro{color:#DC2626;font-size:14px;min-height:20px;margin-top:10px}
+.barra{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px clamp(10px,3vw,24px);background:var(--card);border-bottom:1px solid var(--borda)}
+.marca{display:flex;align-items:center;gap:8px;font-weight:800;margin-right:6px}
+.abas{display:flex;gap:4px;background:var(--trilho);padding:3px;border-radius:999px;overflow-x:auto;max-width:100%}
+.abas button{border:0;background:transparent;color:var(--texto);padding:6px 12px;border-radius:999px;font-size:13.5px;font-weight:700;cursor:pointer;white-space:nowrap}
+.abas button[aria-selected=true]{background:var(--azul);color:#fff}
+.dir{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--suave)}
+.btn{border:1.5px solid var(--borda);background:var(--card);color:var(--texto);border-radius:999px;padding:6px 12px;font-weight:800;font-size:13px;cursor:pointer;white-space:nowrap}
+.btn:disabled{opacity:.6;cursor:wait}
+.btn.amarelo{background:var(--amarelo);border-color:var(--amarelo);color:#2A2000}
+#painel{display:flex;flex-direction:column;height:100vh}
+iframe{display:block;width:100%;border:0;flex:1;min-height:0;background:var(--fundo)}
+.vivo{display:flex;gap:10px;align-items:stretch;flex-wrap:wrap;padding:10px clamp(10px,3vw,24px);background:var(--fundo);border-bottom:1px solid var(--borda);font-size:13px}
+.vivo .rot{display:flex;flex-direction:column;justify-content:center;min-width:120px}.vivo .rot b{font-size:13.5px}.vivo .rot small{color:var(--suave)}
+.ponto{display:inline-block;width:8px;height:8px;border-radius:50%;background:#22C55E;margin-right:6px;box-shadow:0 0 0 3px rgba(34,197,94,.2)}
+.ponto.velho{background:var(--suave);box-shadow:none}
+.bloco{background:var(--card);border:1px solid var(--borda);border-radius:12px;padding:6px 12px;display:flex;gap:14px;align-items:center}
+.bloco .t{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--suave);font-weight:800}
+.bloco div{display:flex;flex-direction:column;line-height:1.15}.bloco b{font-size:18px}.bloco span{font-size:11.5px;color:var(--suave)}
+.aviso{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#0F172A;color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;box-shadow:0 10px 30px rgba(0,0,0,.3);opacity:0;transition:opacity .25s;pointer-events:none;max-width:90vw;text-align:center}
+.aviso.on{opacity:1}
+[hidden]{display:none!important}
+@media(max-width:700px){
+.barra{flex-wrap:wrap;gap:6px;padding:6px 8px}
+.marca{font-size:0;margin-right:0}.marca svg{width:22px;height:22px}
+.abas{order:3;width:100%;flex-wrap:nowrap;scrollbar-width:none}.abas::-webkit-scrollbar{display:none}.abas button{padding:5px 10px;font-size:12.5px}
+.dir{margin-left:auto;gap:4px}.dir .quando{display:none}
+.btn{padding:5px 9px;font-size:12px}
+.vivo{flex-wrap:nowrap;overflow-x:auto;gap:6px;padding:6px 8px;scrollbar-width:none}.vivo::-webkit-scrollbar{display:none}
+.vivo .rot{min-width:auto;flex:none}.vivo .rot b{font-size:0;white-space:nowrap}.vivo .rot b::after{content:"Ao vivo";font-size:12px}.vivo .rot small{display:none}
+.bloco{flex:none;padding:3px 8px;gap:9px;border-radius:10px}.bloco .t{font-size:10px}.bloco b{font-size:14px}.bloco span{font-size:10px}
+}
+</style>
+</head>
+<body>
+<section class="entrada" id="entrada">
+  <form class="caixa" id="form" autocomplete="off">
+    <svg viewBox="0 0 48 48" width="44" height="44" aria-hidden="true"><ellipse cx="24" cy="38" rx="17" ry="6" fill="#F5C542"/><ellipse cx="24" cy="27" rx="12" ry="5.5" fill="#2563EB"/><ellipse cx="24" cy="17" rx="8" ry="4.5" fill="#F5C542"/></svg>
+    <h1>Painel de crescimento</h1>
+    <p>Ebenézer · vídeos, redes, site e jogo. Redes atualizadas às 9h, 13h, 17h e 21h; site e jogo ao vivo.</p>
+    <input type="password" id="senha" placeholder="Senha" aria-label="Senha" required autofocus>
+    <label class="lembrar"><input type="checkbox" id="lembrar" checked> Lembrar neste aparelho</label>
+    <button class="primario" id="abrir" type="submit">Abrir</button>
+    <div class="erro" id="erro" role="alert"></div>
+  </form>
+</section>
+
+<section id="painel" hidden>
+  <div class="barra">
+    <div class="marca"><svg viewBox="0 0 48 48" width="24" height="24" aria-hidden="true"><ellipse cx="24" cy="38" rx="17" ry="6" fill="#F5C542"/><ellipse cx="24" cy="27" rx="12" ry="5.5" fill="#2563EB"/><ellipse cx="24" cy="17" rx="8" ry="4.5" fill="#F5C542"/></svg>Ebenézer</div>
+    <nav class="abas" id="abas" role="tablist"></nav>
+    <div class="dir"><span class="quando" id="quando"></span>
+      <button class="btn amarelo" id="atualizar" type="button" title="Lê o site e o jogo ao vivo e busca a versão mais recente dos relatórios">↻ Atualizar</button>
+      <button class="btn" id="sair" type="button" title="Esquecer a senha neste aparelho">Sair</button></div>
+  </div>
+  <div class="vivo" id="vivo" hidden>
+    <div class="rot"><b><span class="ponto" id="ponto"></span>Site e jogo ao vivo</b><small id="vivo-quando">carregando…</small></div>
+    <div class="bloco"><span class="t">Hoje</span><div><b id="h-v">—</b><span>visitantes</span></div><div><b id="h-j">—</b><span>jogadores</span></div><div><b id="h-p">—</b><span>partidas</span></div></div>
+    <div class="bloco"><span class="t">Ontem</span><div><b id="o-v">—</b><span>visitantes</span></div><div><b id="o-j">—</b><span>jogadores</span></div></div>
+    <div class="bloco"><span class="t">7 dias</span><div><b id="s-v">—</b><span>visitantes</span></div><div><b id="s-j">—</b><span>jogadores</span></div><div><b id="s-p">—</b><span>partidas</span></div></div>
+  </div>
+  <iframe id="quadro" title="Relatório" sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"></iframe>
+</section>
+<div class="aviso" id="aviso" role="status"></div>
+
+<script>
+"use strict";
+const LS = "ebenezer-painel-chave";
+const $ = (id) => document.getElementById(id);
+const deB64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+const paraB64 = (b) => btoa(String.fromCharCode(...new Uint8Array(b)));
+let indice = null, chave = null, abaAtual = null, config = null;
+// Mesmo corte do relatório: sem rotinas do servidor, sem visitas de fora do Brasil e sem tráfego marcado como interno.
+const INTERNOS = "select person_id from events where (event = 'pagina_aberta' and properties.pais is not null and properties.pais != 'BR') or properties.interno = true or properties.automatizado = true";
+const CONSULTA_VIVO = `select
+  uniqIf(person_id, event = 'pagina_aberta' and d = h), uniqIf(person_id, event = 'partida_concluida' and d = h), countIf(event = 'partida_concluida' and d = h),
+  uniqIf(person_id, event = 'pagina_aberta' and d = h - 1), uniqIf(person_id, event = 'partida_concluida' and d = h - 1),
+  uniqIf(person_id, event = 'pagina_aberta' and d >= h - 6), uniqIf(person_id, event = 'partida_concluida' and d >= h - 6), countIf(event = 'partida_concluida' and d >= h - 6),
+  max(ts)
+from (select person_id, event, timestamp as ts, toDate(toTimeZone(timestamp, 'America/Sao_Paulo')) as d, toDate(toTimeZone(now(), 'America/Sao_Paulo')) as h
+      from events where timestamp >= now() - interval 8 day and event in ('pagina_aberta', 'partida_concluida')
+      and distinct_id not like 'rotina:%' and person_id not in (${INTERNOS}))`;
+async function aoVivo() {
+  if (!config || !config.posthog) return;
+  $("vivo").hidden = false;
+  try {
+    const ph = config.posthog;
+    const r = await fetch(`${ph.host}/api/projects/${encodeURIComponent(ph.projeto)}/query/`, {
+      method: "POST", headers: { "Authorization": `Bearer ${ph.chave}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ query: { kind: "HogQLQuery", query: CONSULTA_VIVO } }), cache: "no-store" });
+    if (!r.ok) throw new Error(String(r.status));
+    const v = ((await r.json()).results || [])[0] || [];
+    const fmt = (x) => (x == null ? "—" : Number(x).toLocaleString("pt-BR"));
+    [["h-v", 0], ["h-j", 1], ["h-p", 2], ["o-v", 3], ["o-j", 4], ["s-v", 5], ["s-j", 6], ["s-p", 7]].forEach(([id, i]) => { $(id).textContent = fmt(v[i]); });
+    const ultima = v[8] ? new Date(v[8].replace(" ", "T") + (/Z|[+-]\d\d:?\d\d$/.test(v[8]) ? "" : "Z")) : null;
+    const agora = new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+    $("vivo-quando").textContent = `agora, ${agora}` + (ultima && !isNaN(ultima) ? ` · última atividade ${ultima.toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}` : "");
+    $("ponto").classList.remove("velho");
+    return true;
+  } catch (e) {
+    $("vivo-quando").textContent = "não deu para ler agora";
+    $("ponto").classList.add("velho");
+    return false;
+  }
+}
+
+function avisar(texto) {
+  const a = $("aviso"); a.textContent = texto; a.classList.add("on");
+  clearTimeout(avisar.t); avisar.t = setTimeout(() => a.classList.remove("on"), 3500);
+}
+async function buscarIndice() {
+  const r = await fetch(`dados/indice.json?t=${Date.now()}`, { cache: "no-store" });
+  if (!r.ok) throw new Error("índice indisponível");
+  return r.json();
+}
+async function decifrar(k, { iv, ct }) {
+  const claro = await crypto.subtle.decrypt({ name: "AES-GCM", iv: deB64(iv) }, k, deB64(ct));
+  return new TextDecoder().decode(claro);
+}
+async function derivar(senha, kdf, exportavel) {
+  const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(senha), "PBKDF2", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey({ name: "PBKDF2", salt: deB64(kdf.sal), iterations: kdf.iteracoes, hash: "SHA-256" },
+    base, { name: "AES-GCM", length: 256 }, exportavel, ["decrypt"]);
+}
+async function confere(k) {
+  try { return (await decifrar(k, indice.conferencia)) === "ebenezer-ok"; } catch { return false; }
+}
+function quandoTexto(iso) {
+  const d = new Date(iso);
+  const min = Math.round((Date.now() - d) / 60000);
+  const rel = min < 60 ? `há ${min} min` : min < 1440 ? `há ${Math.round(min / 60)} h` : `há ${Math.round(min / 1440)} d`;
+  return `Redes atualizadas ${rel} · ${d.toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}`;
+}
+function montarAbas() {
+  const nav = $("abas"); nav.textContent = "";
+  for (const a of indice.abas) {
+    const b = document.createElement("button");
+    b.type = "button"; b.role = "tab"; b.textContent = a.titulo; b.dataset.id = a.id;
+    b.addEventListener("click", () => mostrar(a.id));
+    nav.appendChild(b);
+  }
+  $("quando").textContent = quandoTexto(indice.gerado_em);
+}
+async function mostrar(id) {
+  const aba = indice.abas.find((a) => a.id === id) || indice.abas[0];
+  abaAtual = aba.id;
+  history.replaceState(null, "", `#${aba.id}`);
+  for (const b of $("abas").children) b.setAttribute("aria-selected", String(b.dataset.id === aba.id));
+  $("abas").querySelector('[aria-selected="true"]')?.scrollIntoView({ block: "nearest", inline: "center" });
+  if (aba.tipo === "ao-vivo") {
+    try { $("quadro").srcdoc = renderAoVivo(await lerAoVivo(aba)); }
+    catch { $("quadro").srcdoc = '<p style="font-family:sans-serif;padding:30px">Não consegui ler os dados das primeiras horas agora.</p>'; }
+    return;
+  }
+  const r = await fetch(`${aba.arquivo}`, { cache: "no-store" });
+  const html = await decifrar(chave, await r.json());
+  $("quadro").srcdoc = html.replace("<head>", '<head><base target="_blank">');
+}
+// ---------- Aba "Primeiras horas" (inserido no modelo.html pelo montar) ----------
+const REDES_AV = [["instagram", "Instagram", "#A23BEC"], ["facebook", "Facebook", "#1877F2"], ["youtube", "YouTube", "#FF0033"], ["tiktok", "TikTok", "#14B8C4"]];
+let ESCALA_AV = "log"; try { ESCALA_AV = localStorage.getItem("escalaAV") || "log"; } catch {}
+window.addEventListener("message", (e) => { const v = e.data && e.data.escalaAV; if (v === "log" || v === "lin") { ESCALA_AV = v; try { localStorage.setItem("escalaAV", v); } catch {} } });
+const CORES_POSTS = ["#2563EB", "#F59E0B", "#10B981", "#EF4444", "#8B5CF6", "#EC4899", "#14B8C4", "#84CC16", "#F97316", "#64748B"];
+const escAV = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const nAV = (x) => (x == null || Number.isNaN(x) ? "—" : Math.round(x).toLocaleString("pt-BR"));
+const pctAV = (x) => (x == null || !Number.isFinite(x) ? "—" : `${Math.round(x * 100)}%`);
+function idadeAV(min) {
+  if (min < 60) return `${min} min`;
+  const h = Math.floor(min / 60), m = min % 60;
+  return h < 24 ? `${h}h${m ? String(m).padStart(2, "0") : ""}` : `${Math.floor(h / 24)}d ${h % 24}h`;
+}
+function chipAV(v, meta, max) {
+  if (v == null || !Number.isFinite(v)) return '<span class="sn sd">—</span>';
+  const ok = v >= meta && (max == null || v <= max * 1.6);
+  const cls = ok ? "ok" : v >= meta * 0.75 ? "perto" : "baixo";
+  return `<span class="sn ${cls}">${v > 3 ? ">300%" : pctAV(v)}</span>`;
+}
+async function lerAoVivo(aba) {
+  if (config?.github?.token) {
+    try {
+      const g = config.github;
+      const r = await fetch(`https://api.github.com/repos/${g.repo}/contents/${g.arquivo}?t=${Date.now()}`, {
+        headers: { Authorization: `Bearer ${g.token}`, Accept: "application/vnd.github.raw+json" }, cache: "no-store" });
+      if (r.ok) return { dados: JSON.parse(await decifrar(chave, await r.json())), origem: "ao vivo" };
+    } catch {}
+  }
+  const r = await fetch(aba.arquivo, { cache: "no-store" });
+  return { dados: JSON.parse(await decifrar(chave, await r.json())), origem: "cópia da última rodada do painel" };
+}
+function graficoAV(posts, normal, cor, escala = "log") {
+  const log = escala === "log";
+  const W = 640, H = 230, esq = 46, dir = 10, topo = 14, pe = 30;
+  const maxMin = Math.max(60, ...posts.map((p) => Math.min(p.idade_min, 2880)));
+  const xs = (m) => esq + (W - esq - dir) * Math.sqrt(Math.max(0, m) / maxMin);
+  let maxV = 10;
+  for (const p of posts) for (const [m, v] of p.serie) if (m <= maxMin) maxV = Math.max(maxV, v);
+  (normal?.mediana || []).forEach((v, i) => { if (v != null && normal.minutos[i] <= maxMin) maxV = Math.max(maxV, v); });
+  if (log) maxV = Math.pow(10, Math.ceil(Math.log10(maxV + 1)));
+  else { const base10 = Math.pow(10, Math.floor(Math.log10(maxV))); maxV = Math.ceil(maxV / base10) * base10; }
+  const ys = (v) => H - pe - (H - pe - topo) * (log ? Math.log10(1 + Math.max(0, v)) / Math.log10(1 + maxV) : v / maxV);
+  let s = `<svg viewBox="0 0 ${W} ${H}" class="graf">`;
+  const marcasY = log ? (() => { const a = []; for (let t = 0; t <= maxV; t = t ? t * 10 : 10) a.push(t); return a; })() : [0, 1, 2, 3, 4].map((i) => maxV * i / 4);
+  for (const t of marcasY) { const y = ys(t); s += `<line x1="${esq}" x2="${W - dir}" y1="${y}" y2="${y}" class="grade"/><text x="${esq - 6}" y="${y + 4}" class="eixo" text-anchor="end">${nAV(t)}</text>`; }
+  for (const [m, r] of [[15, "15min"], [60, "1h"], [180, "3h"], [360, "6h"], [720, "12h"], [1440, "24h"], [2880, "48h"]]) {
+    if (m > maxMin) continue;
+    s += `<line x1="${xs(m)}" x2="${xs(m)}" y1="${topo}" y2="${H - pe}" class="grade"/><text x="${xs(m)}" y="${H - 10}" class="eixo" text-anchor="middle">${r}</text>`;
+  }
+  if (normal?.mediana?.some((v) => v != null)) {
+    const pts = [[0, 0], ...normal.minutos.map((m, i) => [m, normal.mediana[i]]).filter(([m, v]) => v != null && m <= maxMin)];
+    s += `<polyline points="${pts.map(([m, v]) => `${xs(m).toFixed(1)},${ys(v).toFixed(1)}`).join(" ")}" class="normal"/>`;
+  }
+  posts.forEach((p, i) => {
+    const c = CORES_POSTS[i % CORES_POSTS.length];
+    const medidos = p.serie.filter(([m]) => m >= 0 && m <= maxMin);
+    if (!medidos.length) return;
+    const pts = medidos[0][0] === 0 ? medidos : [[0, 0], ...medidos];
+    const linha = (arr) => arr.map(([m, v]) => `${xs(m).toFixed(1)},${ys(v).toFixed(1)}`).join(" ");
+    if (medidos[0][0] > 0) s += `<polyline points="${linha([[0, 0], medidos[0]])}" fill="none" stroke="${c}" stroke-width="1.5" stroke-dasharray="3 4" opacity=".6"/>`;
+    if (medidos.length > 1) s += `<polyline points="${linha(medidos)}" fill="none" stroke="${c}" stroke-width="2.5" stroke-linejoin="round"><title>${escAV(p.titulo)}</title></polyline>`;
+    const [lm, lv] = pts[pts.length - 1];
+    s += `<circle cx="${xs(lm).toFixed(1)}" cy="${ys(lv).toFixed(1)}" r="4" fill="${c}"/>`;
+  });
+  const dadosHover = { W, H, esq, dir, topo, pe, maxMin, maxV, log,
+    normal: normal?.mediana?.some((v) => v != null) ? [[0, 0], ...normal.minutos.map((m, i) => [m, normal.mediana[i]]).filter(([m, v]) => v != null && m <= maxMin)] : null,
+    posts: posts.map((p, i) => ({ c: CORES_POSTS[i % CORES_POSTS.length], t: (p.titulo || "").slice(0, 46), pts: p.serie.filter(([m]) => m >= 0 && m <= maxMin), idade: p.idade_min })) };
+  s += `<line class="guia" x1="0" x2="0" y1="${topo}" y2="${H - pe}" style="display:none"/><g class="pontos"></g>`;
+  return `<div class="g-wrap" data-g='${JSON.stringify(dadosHover).replace(/'/g, "&#39;")}'>` + s + `</svg><div class="dica" hidden></div></div>`;
+}
+function indicadoresAV(rede, p) {
+  const a = p.atual || {}, d = p.duracao_s;
+  const linha = (rot, val) => `<div><span>${rot}</span><b>${val}</b></div>`;
+  if (rede === "instagram") {
+    const ficaram = a.skip_rate != null ? (100 - a.skip_rate) / 100 : null;
+    const assist = a.tempo_medio_ms && d ? a.tempo_medio_ms / 1000 / d : null;
+    const reass = a.views && a.alcance ? (a.views - a.alcance) / a.alcance : null;
+    return linha("Alcance", nAV(a.alcance)) + linha("Ficaram", chipAV(ficaram, 0.7)) + linha("Assistiram", chipAV(assist, 0.65))
+      + linha("Reassistiram", chipAV(reass, 0.15, 0.25)) + linha("Curtidas", nAV(a.curtidas)) + linha("Coment.", nAV(a.comentarios))
+      + linha("Compart.", nAV(a.compartilhamentos)) + linha("Salvos", nAV(a.salvos));
+  }
+  if (rede === "facebook") {
+    const assist = a.tempo_medio_ms && d ? a.tempo_medio_ms / 1000 / d : null;
+    const reass = a.views ? (a.replays ?? 0) / a.views : null;
+    return linha("Pessoas", nAV(a.alcance)) + linha("Assistiram", chipAV(assist, 0.65)) + linha("Reassistiram", chipAV(reass, 0.15, 0.25))
+      + linha("Reações", nAV(a.curtidas)) + linha("Compart.", nAV(a.compartilhamentos));
+  }
+  if (rede === "youtube") {
+    const eng = a.views ? ((a.curtidas || 0) + (a.comentarios || 0)) / a.views : null;
+    return linha("Curtidas", nAV(a.curtidas)) + linha("Coment.", nAV(a.comentarios)) + linha("Engaj.", pctAV(eng))
+      + linha("Retenção", '<small>chega em 2–3 dias</small>');
+  }
+  const eng = a.views ? ((a.curtidas || 0) + (a.comentarios || 0) + (a.compartilhamentos || 0) + (a.salvos || 0)) / a.views : null;
+  return linha("Curtidas", nAV(a.curtidas)) + linha("Coment.", nAV(a.comentarios)) + linha("Compart.", nAV(a.compartilhamentos))
+    + linha("Salvos", nAV(a.salvos)) + linha("Engaj.", pctAV(eng));
+}
+function normalNaIdade(normal, idade) {
+  if (!normal) return null;
+  const pts = [[0, 0], ...normal.minutos.map((m, i) => [m, normal.mediana[i]]).filter(([, v]) => v != null)];
+  if (pts.length < 2) return null;
+  for (let i = 1; i < pts.length; i++) {
+    if (pts[i][0] >= idade) { const [m0, v0] = pts[i - 1], [m1, v1] = pts[i]; return v0 + (v1 - v0) * (idade - m0) / (m1 - m0); }
+  }
+  return null;
+}
+function renderAoVivo({ dados, origem }) {
+  const gerado = new Date(dados.gerado_em);
+  const minAtras = Math.round((Date.now() - gerado) / 60000);
+  const secoes = REDES_AV.map(([k, nome, cor]) => {
+    const posts = dados.redes[k] || [];
+    const normal = dados.normal?.[k];
+    const temNormal = normal?.mediana?.some((v) => v != null);
+    const marcosNormal = temNormal ? [[60, "1h"], [180, "3h"], [1440, "24h"]].map(([m, r]) => { const i = normal.minutos.indexOf(m); return normal.mediana[i] != null ? `${r}: <b>${nAV(normal.mediana[i])}</b>` : ""; }).filter(Boolean).join(" · ") : "";
+    const cartoes = posts.map((p, i) => {
+      const c = CORES_POSTS[i % CORES_POSTS.length];
+      const ref = normalNaIdade(normal, p.idade_min);
+      const vs = ref && p.atual?.views != null ? p.atual.views / ref - 1 : null;
+      const vsTxt = vs == null ? "" : `<span class="var ${vs >= 0 ? "sobe" : "desce"}">${vs >= 0 ? "▲" : "▼"} ${pctAV(Math.abs(vs))} vs normal</span>`;
+      const marcos = [[60, "1h"], [180, "3h"], [360, "6h"], [1440, "24h"]].map(([m, r]) => `<div><span>${r}</span><b>${nAV(p.marcos?.[m])}</b></div>`).join("");
+      return `<article class="post" style="--c:${c}"><div class="p-topo"><i class="bolinha"></i><div class="p-tit"><a href="${escAV(p.link)}" target="_blank">${escAV(p.titulo || "(sem título)")}</a>
+        <small>${escAV(p.formato)} · há ${idadeAV(p.idade_min)}${p.duracao_s ? ` · ${Math.round(p.duracao_s)} s` : ""}</small></div>
+        <div class="p-v"><b>${nAV(p.atual?.views)}</b><span>views${p.ritmo_por_hora != null ? ` · +${nAV(p.ritmo_por_hora)}/h` : ""}</span>${vsTxt}</div></div>
+        <div class="marcos">${marcos}</div><div class="ind">${indicadoresAV(k, p)}</div></article>`;
+    }).join("");
+    return `<section class="rede" style="--cor:${cor}"><div class="r-cab"><h2>${nome}</h2><span class="sub">${posts.length} post${posts.length === 1 ? "" : "s"} nas últimas ${dados.janela_h} h${marcosNormal ? ` · normal ${marcosNormal}` : ""}</span></div>
+      ${posts.length ? `<div class="g-box"><div class="g-log">${graficoAV(posts, normal, cor, "log")}</div><div class="g-lin">${graficoAV(posts, normal, cor, "lin")}</div><p class="leg">Curva de views desde a publicação (o tempo usa uma escala que dá mais espaço às primeiras horas; views em escala <span class="g-log">logarítmica, que dá espaço aos números pequenos</span><span class="g-lin">normal</span>). Pontilhado: trecho antes da primeira leitura.${temNormal ? " Tracejado: mediana dos posts anteriores na mesma idade." : " A linha \"normal\" aparece depois que alguns posts forem acompanhados desde a publicação."}</p></div><div class="posts">${cartoes}</div>` : `<p class="sub">Nenhum post nas últimas ${dados.janela_h} h.</p>`}</section>`;
+  }).join("");
+  const avisos = (dados.avisos || []).length ? `<p class="avisos">⚠️ ${dados.avisos.map(escAV).join(" · ")}</p>` : "";
+  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="color-scheme" content="light dark"><style>
+:root{--fundo:#F4F6FB;--card:#fff;--card2:#F8FAFC;--trilho:#EEF2F7;--texto:#0F172A;--suave:#64748B;--borda:#E2E8F0;--link:#2563EB}
+@media(prefers-color-scheme:dark){:root{--fundo:#0A1020;--card:#111A2E;--card2:#17233B;--trilho:#1D2944;--texto:#E6EDF8;--suave:#93A3BB;--borda:#24324F;--link:#8AB0FF}}
+*{box-sizing:border-box}body{margin:0;padding:18px clamp(10px,3vw,28px) 40px;background:var(--fundo);color:var(--texto);font-family:Nunito,'Segoe UI',system-ui,sans-serif}
+a{color:var(--link);text-decoration:none}h1{margin:0 0 2px;font-size:22px}.topo-sub{color:var(--suave);font-size:13px;margin:0 0 16px}
+.rede{background:var(--card);border-radius:18px;padding:18px;margin-bottom:18px;border-left:6px solid var(--cor)}
+.r-cab{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}.r-cab h2{margin:0;font-size:20px}.sub{color:var(--suave);font-size:13px}
+.g-box{margin:10px 0 12px}.graf{width:100%;height:auto;max-height:260px}.grade{stroke:var(--trilho)}.eixo{fill:var(--suave);font-size:11px}
+.normal{fill:none;stroke:var(--suave);stroke-width:2;stroke-dasharray:6 5}.leg{color:var(--suave);font-size:12px;margin:4px 0 0}
+.posts{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.post{background:var(--card2);border-radius:14px;padding:12px 14px;border-top:4px solid var(--c)}
+.p-topo{display:flex;gap:10px;align-items:flex-start}.bolinha{width:10px;height:10px;border-radius:50%;background:var(--c);margin-top:6px;flex:none}
+.p-tit{flex:1;min-width:0}.p-tit a{font-weight:800;font-size:14px;color:var(--texto)}.p-tit small{display:block;color:var(--suave);font-size:12px}
+.p-v{text-align:right}.p-v b{display:block;font-size:24px}.p-v span{font-size:11.5px;color:var(--suave)}
+.var{display:inline-block;margin-top:4px;font-size:11.5px;font-weight:800;padding:2px 7px;border-radius:999px}.sobe{background:#DCFCE7;color:#166534}.desce{background:#FEE2E2;color:#991B1B}
+.marcos,.ind{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}.marcos div,.ind div{background:var(--card);border-radius:10px;padding:5px 6px;text-align:center}
+.marcos span,.ind span{display:block;font-size:10.5px;color:var(--suave);text-transform:uppercase;letter-spacing:.03em}.marcos b,.ind b{font-size:14px}
+.ind small{font-size:10px;color:var(--suave);font-weight:600}
+.sn{display:inline-block;padding:1px 6px;border-radius:999px;font-weight:800;font-size:12.5px}.sn.ok{background:#DCFCE7;color:#166534}.sn.perto{background:#FEF3C7;color:#92400E}.sn.baixo{background:#FEE2E2;color:#991B1B}.sn.sd{color:var(--suave)}
+.avisos{color:var(--suave);font-size:12.5px}
+.esc-in{position:absolute;opacity:0;pointer-events:none}.esc{display:inline-flex;background:var(--trilho);border-radius:999px;padding:3px;gap:2px;margin:0 0 14px;font-size:12.5px;font-weight:800}
+.esc label{padding:5px 12px;border-radius:999px;cursor:pointer;color:var(--suave)}#esc-log:checked~.esc label[for=esc-log],#esc-lin:checked~.esc label[for=esc-lin]{background:var(--card);color:var(--texto);box-shadow:0 1px 3px rgba(0,0,0,.15)}
+#esc-log:checked~* .g-lin,#esc-lin:checked~* .g-log{display:none}
+.g-wrap{position:relative;touch-action:pan-y}.guia{stroke:var(--suave);stroke-width:1;stroke-dasharray:3 3}
+.dica{position:absolute;top:6px;pointer-events:none;background:var(--card);border:1px solid var(--borda);border-radius:12px;padding:8px 10px;font-size:12.5px;box-shadow:0 8px 24px rgba(0,0,0,.18);min-width:190px;max-width:300px;transition:left .06s linear}
+.dica h5{margin:0 0 5px;font-size:12px;color:var(--suave);font-weight:800}.dica div{display:flex;gap:7px;align-items:center;margin:3px 0}.dica i{width:9px;height:9px;border-radius:50%;flex:none}
+.dica span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.dica b{font-variant-numeric:tabular-nums}.dica .nm i{border:2px dashed var(--suave);background:none}.dica .est{opacity:.6}.dica .nota{margin:5px 0 0;font-size:11px;color:var(--suave)}
+</style></head><body><input type="radio" name="esc" id="esc-log" class="esc-in"${ESCALA_AV !== "lin" ? " checked" : ""}><input type="radio" name="esc" id="esc-lin" class="esc-in"${ESCALA_AV === "lin" ? " checked" : ""}><h1>⚡ Primeiras horas</h1>
+<p class="topo-sub">Posts das últimas ${dados.janela_h} h, por rede · leitura de ${gerado.toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })} (há ${minAtras} min, ${escAV(origem)}) · coleta a cada 10 min · metas: ficaram 70%, assistiram 65%, reassistiram 15–25%</p>
+<div class="esc"><span style="padding:5px 8px 5px 10px">Escala das views:</span><label for="esc-log">Logarítmica</label><label for="esc-lin">Normal</label></div>
+${avisos}${secoes}<script>
+document.querySelectorAll(".esc-in").forEach((r)=>r.addEventListener("change",()=>{try{parent.postMessage({escalaAV:r.id==="esc-lin"?"lin":"log"},"*");}catch(e){}}));
+(function(){
+  const fmt=(v)=>Math.round(v).toLocaleString("pt-BR");
+  const idade=(m)=>{m=Math.round(m);if(m<60)return m+" min";const h=Math.floor(m/60),r=m%60;return h<24?h+"h"+(r?String(r).padStart(2,"0"):""):Math.floor(h/24)+"d "+(h%24)+"h";};
+  const interp=(pts,m)=>{if(!pts||!pts.length||m>pts[pts.length-1][0])return null;let a=[0,0];for(const p of pts){if(p[0]>=m){const[m0,v0]=a,[m1,v1]=p;return m1===m0?v1:v0+(v1-v0)*(m-m0)/(m1-m0);}a=p;}return null;};
+  document.querySelectorAll(".g-wrap").forEach((w)=>{
+    const g=JSON.parse(w.dataset.g),svg=w.querySelector("svg"),guia=svg.querySelector(".guia"),pontos=svg.querySelector(".pontos"),dica=w.querySelector(".dica");
+    const xs=(m)=>g.esq+(g.W-g.esq-g.dir)*Math.sqrt(Math.max(0,m)/g.maxMin),ys=(v)=>g.H-g.pe-(g.H-g.pe-g.topo)*(g.log?Math.log10(1+Math.max(0,v))/Math.log10(1+g.maxV):v/g.maxV);
+    const mover=(ev)=>{
+      const ctm=svg.getScreenCTM();if(!ctm)return;
+      const x=new DOMPoint(ev.clientX,ev.clientY).matrixTransform(ctm.inverse()).x;
+      const f=Math.min(1,Math.max(0,(x-g.esq)/(g.W-g.esq-g.dir))),m=g.maxMin*f*f;
+      guia.setAttribute("x1",xs(m));guia.setAttribute("x2",xs(m));guia.style.display="";
+      let linhas="",bolas="";
+      const vals=g.posts.map((p)=>({p,v:interp(p.pts,m),est:p.pts.length&&p.pts[0][0]>0&&m<p.pts[0][0]})).filter((o)=>o.v!=null).sort((a,b)=>b.v-a.v);
+      let temEst=false;
+      for(const {p,v,est} of vals){temEst=temEst||est;linhas+='<div'+(est?' class="est"':'')+'><i style="background:'+p.c+'"></i><span>'+p.t.replace(/[&<>]/g,"")+'</span><b>'+(est?'≈ ':'')+fmt(v)+'</b></div>';bolas+='<circle cx="'+xs(m)+'" cy="'+ys(v)+'" r="4.5" fill="'+p.c+'" stroke="white" stroke-width="1.5"/>';}
+      const nv=interp(g.normal,m);
+      if(nv!=null)linhas+='<div class="nm"><i></i><span>normal (mediana)</span><b>'+fmt(nv)+'</b></div>';
+      if(temEst)linhas+='<p class="nota">≈ estimado: antes da primeira leitura do post</p>';
+      pontos.innerHTML=bolas;
+      dica.innerHTML='<h5>'+idade(m)+' depois de publicar</h5>'+(linhas||'<div><span>nenhum post com leitura nesse ponto</span></div>');
+      dica.hidden=false;
+      const px=new DOMPoint(xs(m),0).matrixTransform(ctm).x-w.getBoundingClientRect().left,lw=w.clientWidth,dw=dica.offsetWidth;
+      dica.style.left=(px+14+dw>lw?px-14-dw:px+14)+"px";
+    };
+    const sair=()=>{guia.style.display="none";pontos.innerHTML="";dica.hidden=true;};
+    w.addEventListener("pointermove",mover);w.addEventListener("pointerdown",mover);w.addEventListener("pointerleave",sair);
+  });
+})();
+<\/script></body></html>`;
+}
+
+async function lerConfig() {
+  config = null;
+  if (!indice.config) return;
+  try { const r = await fetch(indice.config, { cache: "no-store" }); config = JSON.parse(await decifrar(chave, await r.json())); } catch {}
+}
+async function entrar(k) {
+  chave = k;
+  $("entrada").hidden = true; $("painel").hidden = false;
+  montarAbas();
+  await lerConfig();
+  aoVivo();
+  await mostrar(location.hash.slice(1));
+}
+async function iniciar() {
+  try { indice = await buscarIndice(); } catch { $("erro").textContent = "Não consegui carregar o painel. Tente de novo em instantes."; return; }
+  const guardada = localStorage.getItem(LS);
+  if (guardada) {
+    try {
+      const { sal, raw } = JSON.parse(guardada);
+      if (sal === indice.kdf.sal) {
+        const k = await crypto.subtle.importKey("raw", deB64(raw), "AES-GCM", false, ["decrypt"]);
+        if (await confere(k)) return entrar(k);
+      }
+    } catch {}
+    localStorage.removeItem(LS);
+  }
+}
+$("form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  $("erro").textContent = ""; $("abrir").disabled = true; $("abrir").textContent = "Abrindo…";
+  try {
+    if (!indice) indice = await buscarIndice();
+    const lembrar = $("lembrar").checked;
+    const k = await derivar($("senha").value, indice.kdf, true);
+    if (!(await confere(k))) { $("erro").textContent = "Senha incorreta."; return; }
+    if (lembrar) localStorage.setItem(LS, JSON.stringify({ sal: indice.kdf.sal, raw: paraB64(await crypto.subtle.exportKey("raw", k)) }));
+    $("senha").value = "";
+    await entrar(k);
+  } catch { $("erro").textContent = "Não deu para abrir agora. Tente de novo."; }
+  finally { $("abrir").disabled = false; $("abrir").textContent = "Abrir"; }
+});
+$("atualizar").addEventListener("click", async () => {
+  const b = $("atualizar"); b.disabled = true; b.textContent = "↻ Buscando…";
+  try {
+    const novo = await buscarIndice();
+    const mudou = novo.gerado_em !== indice.gerado_em;
+    indice = novo;
+    if (!(await confere(chave))) { localStorage.removeItem(LS); location.reload(); return; }
+    montarAbas();
+    await lerConfig();
+    const vivoOk = await aoVivo();
+    await mostrar(abaAtual);
+    const vivoTxt = config ? (vivoOk ? "Site e jogo: ao vivo agora." : "Site e jogo: sem leitura ao vivo agora.") : "";
+    const hora = new Date(indice.gerado_em).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+    const pfTxt = abaAtual === "ao-vivo" ? "Primeiras horas: dados da última coleta (a cada 10 min)." : "";
+    avisar(`${pfTxt || vivoTxt} ${mudou ? `Redes: versão nova, de ${hora}.` : `Relatórios: números de ${hora}.`}`.trim());
+  } catch { avisar("Sem conexão com o painel agora."); }
+  finally { b.disabled = false; b.textContent = "↻ Atualizar"; }
+});
+$("sair").addEventListener("click", () => { localStorage.removeItem(LS); location.hash = ""; location.reload(); });
+setInterval(async () => {
+  if (document.hidden || !chave) return;
+  try { const n = await buscarIndice(); if (n.gerado_em !== indice.gerado_em) { indice = n; montarAbas(); await lerConfig(); await mostrar(abaAtual); avisar("Chegaram números novos."); } else $("quando").textContent = quandoTexto(indice.gerado_em); } catch {}
+  aoVivo();
+  if (abaAtual === "ao-vivo") mostrar("ao-vivo");
+}, 5 * 60 * 1000);
+iniciar();
+</script>
+</body>
+</html>
